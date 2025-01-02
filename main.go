@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	imageprocessing "goroutines_pipeline/image_processing"
 	"image"
 	"strings"
+
+	imageprocessing "github.com/hugolesta/concurrency-pipeline/image_processing"
 )
 
 type Job struct {
@@ -16,7 +17,8 @@ type Job struct {
 func loadImage(paths []string) <-chan Job {
 	out := make(chan Job)
 	go func() {
-		out := make(chan Job)
+		// For each input path create a job and add it to
+		// the out channel
 		for _, p := range paths {
 			job := Job{InputPath: p,
 				OutPath: strings.Replace(p, "images/", "images/output/", 1)}
@@ -65,8 +67,15 @@ func saveImage(input <-chan Job) <-chan bool {
 	}()
 	return out
 }
+
 func main() {
-	imagePaths := []string{"./images/image1.jpeg", "./images/image2.jpeg", "./images/image3.jpeg", "./images/image4.jpeg"}
+
+	imagePaths := []string{"images/image1.jpeg",
+		"images/image2.jpeg",
+		"images/image3.jpeg",
+		"images/image4.jpeg",
+	}
+
 	channel1 := loadImage(imagePaths)
 	channel2 := resize(channel1)
 	channel3 := convertToGrayscale(channel2)
